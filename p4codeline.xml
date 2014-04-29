@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p4codeline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="p4cm.xsd" schemaVersion="2.2.0">
+  <module name="MAIN">
+    <codeline owner="equ" path="//CM/P4CMWeb/Server/MAIN">
+      <namingConvention/>
+      <description>Main codeline for development</description>
+      <rules>
+        <rule>Develop on MAIN, and create a TAG codeline on release</rule>
+        <rule>Never break the build on the MAIN</rule>
+      </rules>
+    </codeline>
+    <externals/>
+  </module>
+</p4codeline>
