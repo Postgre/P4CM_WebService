@@ -60,6 +60,6 @@ class P4ClientRunner(P4CommandsRunner):
             p4client.clone_client(os.path.basename(root), self.env.client, root)
 
         else:
-            return "%s %s -o %s" % (self.executable(), "client", kwargs['pk'])
+            return "%s %s -o %s" % (self.executable(), "client", kwargs['client'])
 
 
