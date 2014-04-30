@@ -33,6 +33,8 @@ class P4TicketAuthentication(Authentication):
         if status:
             request.p4env = p4env
 
+        request._read_started = False
+
         return status
 
     def get_identifier(self, request):

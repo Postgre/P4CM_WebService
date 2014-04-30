@@ -65,6 +65,8 @@ DEBUG_TOOLBAR_PANELS = (
 
 
 THIRD_PARTY_APPS = (
+    'api',
+    'tests',
     'debug_toolbar',
     'tastypie',
     'nose',
@@ -79,3 +81,5 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 from logging import *
 
+P4_EXECUTABLE = '/usr/local/bin/p4'
+P4CM_EXECUTABLE = 'tp4cm'

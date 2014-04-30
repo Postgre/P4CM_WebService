@@ -1,3 +1,4 @@
+import os
 from django.conf.urls import url
 
 from api.models import P4Object
@@ -16,27 +17,19 @@ __author__ = 'ericqu'
 
 
 class P4Resource(Resource):
-    message = fields.CharField(attribute='message')
+    message = fields.CharField(attribute='message', blank=True, null=True)
 
 
 class P4ClientResource(P4Resource):
-    client = fields.CharField(attribute='client')
+    client = fields.CharField(attribute='client', blank=True, null=True)
+    workspace = fields.CharField(attribute='workspace', blank=True, null=True)
 
     class Meta:
-        resource_name = 'client'
+        resource_name = 'clients'
         object_class = P4Object
         authentication = P4TicketAuthentication()
         authorization = Authorization()
-
-    def prepend_urls(self):
-        return [
-            url(
-                r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/clone_to_temp%s$" %
-                (self._meta.resource_name, trailing_slash()),
-                self.wrap_view('clone_to_temp'),
-                name="client_clone_to_temp"
-            ),
-        ]
+        always_return_data = True
 
     def detail_uri_kwargs(self, bundle_or_obj):
         kwargs = {}
@@ -51,9 +44,6 @@ class P4ClientResource(P4Resource):
         return kwargs
 
     def obj_get(self, bundle, **kwargs):
-        print(kwargs)
-        print bundle.request.GET
-
         req_args = {'client': kwargs['pk']}
         for k in bundle.request.GET:
             req_args[k] = bundle.request.GET[k]
@@ -91,19 +81,26 @@ class P4ClientResource(P4Resource):
 
     def obj_delete(self, bundle, **kwargs):
         client = kwargs['pk']
-        print client
         p4client = P4Client(P4Env(bundle.request))
         p4client.delete_temp_workspace(client)
 
-    def clone_to_temp(self, request):
-        req_args = {'clone_to_temp': True}
-        for k in request.GET:
-            req_args[k] = request.GET[k]
-        runner = P4ClientRunner(P4Env(request), **req_args)
+    def obj_create(self, bundle, **kwargs):
 
-        data = runner.run()
+        p4client = P4Client(P4Env(bundle.request))
+        if 'client' in bundle.data:
+            workspace = p4client.create_temp_workspace(bundle.data['client'])
+        else:
+            workspace = p4client.create_temp_workspace()
 
-        return P4Object(initial=data)
+        data = {
+            'client': os.path.basename(workspace),
+            'workspace': workspace,
+        }
+
+        bundle.obj = P4Object(initial=data)
+
+        return bundle
+
 
 
 

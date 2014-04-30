@@ -41,11 +41,24 @@ class P4Login(BaseP4Command):
 
 class P4Client(BaseP4Command):
 
-    def create_temp_workspace(self):
+    def create_temp_workspace(self, template=None):
         pre_workspace = "%s_%s_" % (self.env.user, "P4CM_WEB_TEMP")
 
         tmp_workspace_path = tempfile.mkdtemp(suffix="", prefix=pre_workspace)
-        self.create_p4config_file(tmp_workspace_path)
+
+        if template is not None:
+            client = template
+        else:
+            client = self.env.client
+
+        workspace_name = os.path.basename(tmp_workspace_path)
+        if client:
+            with cd(tmp_workspace_path):
+                self.clone_client(os.path.basename(tmp_workspace_path), self.env.client, tmp_workspace_path)
+
+            self.create_p4config_file(tmp_workspace_path, workspace_name)
+        else:
+            self.create_p4config_file(tmp_workspace_path)
 
         return tmp_workspace_path
 
@@ -62,14 +75,13 @@ class P4Client(BaseP4Command):
         if os.path.exists(root):
             self.run('rm -rf %s' % root)
 
-    def create_p4config_file(self, workspace):
+    def create_p4config_file(self, workspace, client=None):
         with open(os.path.join(workspace, self.env.p4config), 'w') as f:
             f.write("P4PORT=%s\n" % self.env.port)
             f.write("P4USER=%s\n" % self.env.user)
             f.write("P4CHARSET=%s\n" % self.env.charset)
-
-            if self.env.workspace:
-                f.write("P4CLIENT=%s\n" % self.env.workspace)
+            if client:
+                f.write("P4CLIENT=%s\n" % client)
 
     def unlock_client(self, name):
         if not self.client_exists(name):

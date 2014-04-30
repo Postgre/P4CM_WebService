@@ -45,6 +45,8 @@ class P4CommandsRunner(CommandsRunner):
     def run_command(self):
         with prefix("cd %s" % self.workspace):
             result = super(P4CommandsRunner, self).run_command()
+            print result.stdout
+            print result.stderr
 
             return result
 
